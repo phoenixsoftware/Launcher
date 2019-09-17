@@ -3,7 +3,7 @@ Java program to launch a Node.js or other script on z/OS.
 
 This program is intended to be run from the JSOZ Launcher (see sample JCL below) so that the JSOZ classes are available. The name of the target script is specified in the PARM field.
 
-The target script is expected to write its process id to a file called .pid-scriptname in the startup directory, where scriptname is file name of the script. This allows the Launcher to send a HUP signal to the target script process when an operator STOP (P) command is received. Of course, the target script is also expected to implement a HUP signal handler to effect an orderly shut down.
+__The target script is expected to write its process id to a file__ called .pid-scriptname in the startup directory, where scriptname is file name of the script. This allows the Launcher to send a HUP signal to the target script process when an operator STOP (P) command is received. Of course, __the target script is also expected to implement a HUP signal handler__ to effect an orderly shut down.
 
 ## Sample JCL Procedure for STC:
 
