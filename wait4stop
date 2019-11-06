@@ -1,0 +1,21 @@
+#!/usr/lpp/IBM/cnj/IBM/node-latest-os390-s390x/bin/node
+/*
+ * Sample Node.js program demonstrating SIGTERM handler for operator STOP (P) command.
+ * Includes SIGINT handler for Ctrl-C break when run interactively.
+ */
+
+const everyOneMinute = (60 * 1000)
+
+const timer = setInterval( () => {
+  console.log(new Date())
+},everyOneMinute)
+
+const cleanup = (sig) => {
+  console.error(`signal: ${sig}`)
+  clearInterval( timer )
+}
+
+process.on('SIGTERM', () => { cleanup('SIGTERM') })
+process.on('SIGINT', () => { cleanup('SIGINT') })
+
+console.log("Running")
