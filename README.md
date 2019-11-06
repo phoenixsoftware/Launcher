@@ -1,26 +1,43 @@
 # Launcher
 Java program to launch a Node.js or other script on z/OS.
 
-This program is intended to be run from the JSOZ Launcher (see sample JCL below) so that the JSOZ classes are available. The name of the target script is specified in the PARM field.
+This program is intended to be run as a started task (STC) — see sample JCL below — so that a Node.js program can be controlled with operator START (S) and STOP (P) commands. The name of the target script and its arguments are specified in the PARM field.
 
-__The target script is expected to write its process id to a file__ called .pid-scriptname in the startup directory, where scriptname is file name of the script. This allows the Launcher to send a HUP signal to the target script process when an operator STOP (P) command is received. Of course, __the target script is also expected to implement a HUP signal handler__ to effect an orderly shut down.
+__The target script is expected to implement a TERM signal handler__ to effect an orderly shut down.
+
+By default the launcher will create a STEP level SHARED ENQ with a QNAME of LAUNCHER and an RNAME equal to the target script path. This can be changed via optional flags to, for example, prevent more than one instance of target script.
+
+Also by default when the target script terminates the Launcher STC will end. This can be changed via optional flags to, for example, restart the target script automatically at a given time.
+
+Any or all of the optional flags shown here may be specified in the parm field:
+
+Flag|Description
+----|-----------
+-e|Changes the ENQ resource control from SHARED to EXCLUSIVE.
+-k|Restart the target script when it ends (except as a result of an operator STOP command).
+-m|Changes the ENQ scope from STEP to SYSTEM.
+-p|Changes the ENQ scope from STEP to SYSPLEX.
+-r hh:mm|Restart the target script at the indicated time. N.B., without the -k flag the script will terminate at the indicated time but will not restart.
+-s|Changes the ENQ scope from STEP to SYSTEMS.
 
 ## Sample JCL Procedure for STC:
 
 ```
-//EJESLICN PROC
+//LAUNCHER PROC
 //*
 // SET JAVACLS='com.phoenixsoftware.util.Launcher'
-// SET ARGS='/path/to/script arg1 arg2 arg3'
+// SET FLAGS='-r 01:00 -k -e -p' 
+// SET SCRIPT='/path/to/script'
+// SET ARGS='arg1 arg2 arg3'
 // SET LIBRARY='JVB800.SIEALNKE'         < STEPLIB FOR JVMLDM module
 // SET VERSION='86'                      < JVMLDM version: 86
 // SET LOGLVL='+D'                       < Debug LVL: +I(info) +T(trc)
 // SET REGSIZE='0M'                      < EXECUTION REGION SIZE
 // SET LEPARM=''
-//*               
+//*
 //JAVAJVM  EXEC PGM=JVMLDM&VERSION,REGION=&REGSIZE,TIME=NOLIMIT,
-//   PARM='&LEPARM/&LOGLVL &JAVACLS &ARGS'                   
-//STEPLIB  DD DSN=&LIBRARY,DISP=SHR                
+//   PARM='&LEPARM/&LOGLVL &JAVACLS &FLAGS &SCRIPT &ARGS'
+//STEPLIB  DD DSN=&LIBRARY,DISP=SHR
 //STDENV   DD *,DLM='%~'
 . /etc/profile
 export JAVA_HOME=/usr/lpp/java/current_64/
@@ -37,8 +54,8 @@ export IBM_JAVA_OPTIONS="-Xms64m -Xmx128m"
 //STDOUT   DD SYSOUT=*          < Java System.out
 //STDERR   DD SYSOUT=*          < Java System.err
 //SYSOUT   DD SYSOUT=*          < System stderr
-//CEEDUMP  DD SYSOUT=*                                     
-//ABNLIGNR DD DUMMY                                 
+//CEEDUMP  DD SYSOUT=*
+//ABNLIGNR DD DUMMY
 //SYSMDUMP DD SYSOUT=*
 //*
 ```
