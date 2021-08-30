@@ -3,7 +3,7 @@ Java program to launch a Node.js or other script on z/OS.
 
 This program is intended to be run as a started task (STC) — see sample JCL below — so that a Node.js program can be controlled with operator START (S) and STOP (P) commands. The name of the target script and its arguments are specified in the PARM field.
 
-__The target script is expected to implement a TERM signal handler__ to effect an orderly shut down.
+__The target script is expected to implement a TERM signal handler__ to effect an orderly shut down. See the wait4stop sample code.
 
 By default the launcher will create a STEP level SHARED ENQ with a QNAME of LAUNCHER and an RNAME equal to the target script path. This can be changed via optional flags to, for example, prevent more than one instance of target script.
 
