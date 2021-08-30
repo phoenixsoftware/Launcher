@@ -10,12 +10,12 @@ const timer = setInterval( () => {
   console.log(new Date())
 },everyOneMinute)
 
-const cleanup = (sig) => {
-  console.error(`signal: ${sig}`)
+const cleanup = (signal) => {
+  console.error(`signal: ${signal}`)
   clearInterval( timer )
 }
 
-process.on('SIGTERM', () => { cleanup('SIGTERM') })
-process.on('SIGINT', () => { cleanup('SIGINT') })
+process.on('SIGTERM', (signal) => { cleanup(signal) })
+process.on('SIGINT', (signal) => { cleanup(signal) })
 
 console.log("Running")
